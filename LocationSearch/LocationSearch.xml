@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LocationSearch</name>
+    </assembly>
+    <members>
+        <member name="M:LocationSearch.Controllers.LocationController.#ctor(LocationSearch.DBContext.AppDBContext)">
+            <summary>
+            The service constructor
+            </summary>
+            <param name="appDBContext">The injected application DB context</param>
+        </member>
+        <member name="M:LocationSearch.Controllers.LocationController.GetLocationsAsync(LocationSearch.Model.Location,System.Double,System.Int32)">
+            <summary>
+            Returns the nearby locations based on provided inputs.
+            </summary>
+            <param name="location">The current location of the user</param>
+            <param name="maxDistance">The maximum distance from the current location</param>
+            <param name="maxResults">The maximum number of locations to return</param>
+            <exception cref="T:Microsoft.AspNetCore.Mvc.StatusCodeResult">200 - Returns success with list of locations</exception>
+            <exception cref="T:Microsoft.AspNetCore.Mvc.StatusCodeResult">404 - Returns on empty result</exception>
+            <exception cref="T:Microsoft.AspNetCore.Mvc.StatusCodeResult">500 - Returns on internal exception</exception>
+            <returns>The list of nearby locations</returns>
+        </member>
+        <member name="T:LocationSearch.Model.CsvLocation">
+            <summary>
+            Represents the task location in the provided csv file.
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.CsvLocation.Address">
+            <summary>
+            The address of the task
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.CsvLocation.Latitude">
+            <summary>
+            The latitide of the task
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.CsvLocation.Longitude">
+            <summary>
+            The longitude of the task
+            </summary>
+        </member>
+        <member name="M:LocationSearch.Model.Location.Add(System.Double,System.Double)">
+            <summary>
+            Creates a new location that is <paramref name="offsetLat"/>, <paramref name="offsetLon"/> meters from this location.
+            </summary>
+        </member>
+        <member name="M:LocationSearch.Model.Location.CalculateDistance(LocationSearch.Model.Location)">
+            <summary>
+            Calculates the distance between this location and another one, in meters.
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.LocationResponse.Id">
+            <summary>
+            The record unique id
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.LocationResponse.Distance">
+            <summary>
+            Distance between user and the task location in meters
+            </summary>
+        </member>
+        <member name="T:LocationSearch.Model.Task">
+            <summary>
+            Represents the task at specific location
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.Task.Id">
+            <summary>
+            The task id
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.Task.Address">
+            <summary>
+            The address of the task
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.Task.Latitude">
+            <summary>
+            The latitude of the task
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.Task.Longitude">
+            <summary>
+            The longitude of the task
+            </summary>
+        </member>
+        <member name="P:LocationSearch.Model.Task.GeoLocation">
+            <summary>
+            The coordinates of the task
+            </summary>
+        </member>
+    </members>
+</doc>
