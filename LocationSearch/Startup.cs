@@ -1,4 +1,6 @@
+using LocationSearch.DAL.Repositories;
 using LocationSearch.DBContext;
+using LocationSearch.Interface;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -27,11 +29,16 @@ namespace LocationSearch
 
             services.AddControllers();
             
+            // Inject the DbContext service in the DI container
             services.AddDbContext<AppDBContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("LocalSQLServer"),
                     x => x.UseNetTopologySuite());
             });
+
+            // Inject the TaskRespository in the DI container
+            services.AddScoped<ITaskRepository, TaskRepository>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "LocationSearch", Version = "v1" });

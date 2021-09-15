@@ -8,49 +8,34 @@ namespace LocationSearch.Model
 {
     public class Location
     {
-        public double Latitude { get; set; }
+        public Location()
+        {
 
-        public double Longitude { get; set; }
+        }
 
-        public Location(double latitude, double longitude)
+        public Location(double latitude, double longitude, double maxDistance, int maxResults)
         {
             Latitude = latitude;
             Longitude = longitude;
+            MaxDistance = maxDistance;
+            MaxResults = maxResults;
         }
 
-        /// <summary>
-        /// Creates a new location that is <paramref name="offsetLat"/>, <paramref name="offsetLon"/> meters from this location.
-        /// </summary>
-        public Location Add(double offsetLat, double offsetLon)
-        {
-            double latitude = Latitude + (offsetLat / 111111d);
-            double longitude = Longitude + (offsetLon / (111111d * Math.Cos(latitude)));
+        [Required]
+        [Range(-90, 90, ErrorMessage = "Invalid latitude value. It must be in the range of -90 to 90.")]
+        public double Latitude { get; set; }
+        
+        [Required]
+        [Range(-180, 180, ErrorMessage = "Invalid longitude value. It must be in the range of -180 to 180.")]
+        public double Longitude { get; set; }
 
-            return new Location(latitude, longitude);
-        }
+        [Required]
+        [Range(1, double.MaxValue, ErrorMessage = "Maximum distance must be grater than 1 meter")]
+        public double MaxDistance { get; set; }
 
-        /// <summary>
-        /// Calculates the distance between this location and another one, in meters.
-        /// </summary>
-        public double CalculateDistance(Location location)
-        {
-            var rlat1 = Math.PI * Latitude / 180;
-            var rlat2 = Math.PI * location.Latitude / 180;
-            var rlon1 = Math.PI * Longitude / 180;
-            var rlon2 = Math.PI * location.Longitude / 180;
-            var theta = Longitude - location.Longitude;
-            var rtheta = Math.PI * theta / 180;
-            var dist = Math.Sin(rlat1) * Math.Sin(rlat2) + Math.Cos(rlat1) * Math.Cos(rlat2) * Math.Cos(rtheta);
-            dist = Math.Acos(dist);
-            dist = dist * 180 / Math.PI;
-            dist = dist * 60 * 1.1515;
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Maximum results must be greater than 0")]
+        public int MaxResults { get; set; }
 
-            return dist * 1609.344;
-        }
-
-        public override string ToString()
-        {
-            return Latitude + ", " + Longitude;
-        }
     }
 }

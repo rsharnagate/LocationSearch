@@ -1,43 +1,29 @@
 using LocationSearch.Controllers;
-using LocationSearch.DBContext;
+using LocationSearch.Interface;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NetTopologySuite;
-using NetTopologySuite.Geometries;
+using Moq;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LocationSearch.UnitTest
 {
     public class Tests
     {
-        private AppDBContext _locationDbContext = null;
+        private Mock<ITaskRepository> _mockTaskRepository;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            // Setup DBContext with memory database
-
-            var options = new DbContextOptionsBuilder<AppDBContext>()
-                .UseInMemoryDatabase(databaseName: "location").Options;
-
-            _locationDbContext = new AppDBContext(options);
-            _locationDbContext.Tasks.Add(new Model.Task
-            {
-                Id = 1,
-                Address = "Address 123",
-                Latitude = 52.2165425,
-                Longitude = 5.4778534,
-                GeoLocation = new Point(new Coordinate(5.4778534, 52.2165425))
-            });
-            _locationDbContext.SaveChanges();
+            _mockTaskRepository = new Mock<ITaskRepository>();
         }
 
         [Test]
         public async Task GetLocationsAsync_WhenInvalidInputs()
         {
-            var controller = new LocationController(_locationDbContext, null);
-            var response = await controller.GetLocationsAsync(null, 1, 1);
+            var controller = new LocationController(_mockTaskRepository.Object);
+            var response = await controller.GetLocationsAsync(null);
 
             Assert.AreEqual(400, ((ObjectResult)response.Result).StatusCode);
         }
@@ -45,9 +31,8 @@ namespace LocationSearch.UnitTest
         [Test]
         public async Task GetLocationsAsync_WhenEmptyResult()
         {
-            var ntsGeometryServices = new NtsGeometryServices();
-            var controller = new LocationController(_locationDbContext, ntsGeometryServices);
-            var response = await controller.GetLocationsAsync(new Model.Location(51.2165425, 4.4778534), 1, 1);
+            var controller = new LocationController(_mockTaskRepository.Object);
+            var response = await controller.GetLocationsAsync(new Model.Location(51.2165425, 4.4778534, 1, 1));
 
             Assert.AreEqual(404, ((StatusCodeResult)response.Result).StatusCode);
         }
@@ -55,9 +40,17 @@ namespace LocationSearch.UnitTest
         [Test]
         public async Task GetLocationsAsync_WhenSuccess()
         {
-            var ntsGeometryServices = new NtsGeometryServices();
-            var controller = new LocationController(_locationDbContext, ntsGeometryServices);
-            var response = await controller.GetLocationsAsync(new Model.Location(52.2165425, 5.4778534), 1, 1);
+            // Mock the GetLocationsAsync() repository call to return the fake data
+            var fakeLocationList = new List<Model.LocationResponse>
+            {
+                new Model.LocationResponse(1, "Fake Address 1", 12.12345, 34.12345, 1234),
+                new Model.LocationResponse(2, "Fake Address 2", 56.12345, 78.12345, 1234)
+            };
+            _mockTaskRepository.Setup(m => m.GetLocationsAsync(It.IsAny<Model.Location>()))
+                .ReturnsAsync(fakeLocationList);
+
+            var controller = new LocationController(_mockTaskRepository.Object);
+            var response = await controller.GetLocationsAsync(new Model.Location(52.2165425, 5.4778534, 1, 1));
 
             Assert.AreEqual(200, ((OkObjectResult)response.Result).StatusCode);
         }
@@ -65,17 +58,14 @@ namespace LocationSearch.UnitTest
         [Test]        
         public async Task GetLocationsAsync_WhenExceptionThrown()
         {
-            var controller = new LocationController(_locationDbContext, null);
-            var response = await controller.GetLocationsAsync(new Model.Location(52.2165425, 5.4778534), 1, 1);
+            // Mock the GetLocationsAsync() repository call to throw an exception.
+            _mockTaskRepository.Setup(m => m.GetLocationsAsync(It.IsAny<Model.Location>()))
+                .ThrowsAsync(new Exception());
+
+            var controller = new LocationController(_mockTaskRepository.Object);
+            var response = await controller.GetLocationsAsync(new Model.Location(52.2165425, 5.4778534, 1, 1));
 
             Assert.AreEqual(500, ((StatusCodeResult)response.Result).StatusCode);
-        }
-
-        [OneTimeTearDown]
-        public void Cleanup()
-        {
-            if (_locationDbContext != null)
-                _locationDbContext.Dispose();
         }
     }
 }
